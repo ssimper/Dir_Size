@@ -15,3 +15,5 @@ parent_directories = [
     Path("/home/partages/SAGE/SAGE"),
     Path("/home/partages/TECHNIQUE"),
 ]
+
+#Modif Git
