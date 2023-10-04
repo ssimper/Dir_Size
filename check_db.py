@@ -2,10 +2,9 @@
 # source racine : https://www.sqlitetutorial.net/sqlite-python/
 
 import datetime, sqlite3
-from datetime import datetime
+from constants import my_db
+from datetime import datetime, timedelta
 from sqlite3 import Error
-
-my_db = "/home/simper/Dropbox/Etudes/Python/Projets_réels/Dir_Size/Prod/siah_data.db"
 
 
 def create_connection(db_file):
@@ -118,6 +117,41 @@ def dir_size(conn, table):
         id_pos += 1
 
 
+def full_size(conn, table_list):
+    #Create a list of last 5 days
+    date_list = []
+    day_count = 1
+    compteur = 1
+    a_day = datetime.now()
+    while day_count < 6:
+        a_day = datetime.now() - timedelta(days=compteur)
+        a_day_wd = a_day.strftime("%a")
+        if a_day_wd not in ['Sat', 'Sun']:
+            date_list.append(a_day.strftime("%Y-%m-%d"))
+            day_count += 1
+        compteur += 1
+    #today = datetime.now() - timedelta(days=1)
+    print(date_list)
+    for date in date_list:
+        print(date)
+        full_size = 0
+        for table in table_list:
+            #print(table)
+            cursor = conn.cursor()
+            sql = """SELECT * FROM """ + table + \
+            """ WHERE Date like '%""" + date + """%'"""
+            #print(sql)
+            result = cursor.execute(sql)
+            for row in result:
+                row = list(row)
+                folders_size = row[2:]
+                total_size = 0
+                for folder_size in folders_size:
+                    total_size += int(folder_size)
+                #print(f'total size : {total_size}')
+                full_size += total_size
+        print(f'full size = {round((full_size/1024**2), 2)}')
+        
 
 
 def main():
@@ -125,8 +159,9 @@ def main():
     table_list = check_tables(conn, my_db)
     print(table_list)
     #compare_records(conn, table_list)
-    for table in table_list:
-        dir_size(conn, table)
+    #for table in table_list:
+    #    dir_size(conn, table)
+    full_size(conn, table_list)
     conn.close()
      
 
